@@ -41,7 +41,7 @@ const Employees = () => {
             </div>
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <main className="flex-1 overflow-y-auto lg:pl-64 mt-16">
+            <main className="flex-1 overflow-y-auto lg:pl-64 mt-16 custom-scrollbar-light">
                 <div className="p-5">
                     <div className="max-w-7xl mx-auto">
                         {/* Header Section */}
