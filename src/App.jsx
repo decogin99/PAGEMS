@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
 import Activities from "./pages/Activities";
 import Employees from "./pages/Employees";
+import Report from "./pages/Report";
 import Leave from "./pages/Leave";
 import CarBooking from "./pages/CarBooking";
 import Messages from "./pages/Messages";
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/PAGEMS/announcements" element={<Announcements />} />
         <Route path="/PAGEMS/activities" element={<Activities />} />
         <Route path="/PAGEMS/leave" element={<Leave />} />
+        <Route path="/PAGEMS/report" element={<Report />} />
         <Route path="/PAGEMS/carbooking" element={<CarBooking />} />
 
         <Route path="/PAGEMS/employees" element={<Employees />} />
