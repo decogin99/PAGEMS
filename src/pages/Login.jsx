@@ -29,7 +29,7 @@ const Login = () => {
         if (formData.username === "admin" && formData.password === "admin") {
             setTimeout(() => {
                 setLoading(false);
-                navigate("/PAGEMS/dashboard");
+                navigate("/dashboard");
             }, 1000);
         } else {
             setTimeout(() => {
