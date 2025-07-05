@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(),
   tailwindcss(),
   ],
-  base: '/PAGEMS',
+  base: '/',
   server: {
     host: '0.0.0.0',
     port: 5173, // or whatever port you're using
