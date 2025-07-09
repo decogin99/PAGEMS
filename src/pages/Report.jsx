@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { useTheme } from '../context/ThemeContext';
 
 const Report = () => {
+    const { darkMode } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState('');
@@ -61,25 +63,27 @@ const Report = () => {
     }, {});
 
     const getStatusColor = (status) => {
-        return status === 'finished' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+        return status === 'finished'
+            ? (darkMode ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800')
+            : (darkMode ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-100 text-yellow-800');
     };
 
     return (
-        <div className="fixed inset-0 flex flex-col bg-gray-50">
+        <div className={`fixed inset-0 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             <div className={`${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
                 <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
             </div>
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <main className="flex-1 overflow-y-auto lg:pl-64 mt-16 custom-scrollbar-light">
+            <main className={`flex-1 overflow-y-auto lg:pl-64 mt-16 ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 <div className="p-5">
                     <div className="max-w-6xl mx-auto">
                         {/* Header */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Daily Reports
                             </h1>
-                            <button 
+                            <button
                                 onClick={() => setIsFormOpen(true)}
                                 className="px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors w-full sm:w-auto flex items-center justify-center gap-2"
                             >
@@ -91,13 +95,13 @@ const Report = () => {
                         </div>
 
                         {/* Filters */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                            <h2 className="text-lg font-semibold mb-4">Filters</h2>
+                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
+                            <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Filters</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
-                                    <select 
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                    <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Month</label>
+                                    <select
+                                        className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                         value={reportType}
                                         onChange={(e) => setReportType(e.target.value)}
                                     >
@@ -117,9 +121,9 @@ const Report = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-                                    <select 
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                    <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Report Type</label>
+                                    <select
+                                        className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                         value={reportType}
                                         onChange={(e) => setReportType(e.target.value)}
                                     >
@@ -130,21 +134,23 @@ const Report = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                    <input 
-                                        type="date" 
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                    <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Start Date</label>
+                                    <input
+                                        type="date"
+                                        className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} appearance-none max-w-full`}
                                         value={dateRange.start}
                                         onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                                        style={{ minWidth: '100%' }}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                    <input 
-                                        type="date" 
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                    <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>End Date</label>
+                                    <input
+                                        type="date"
+                                        className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} appearance-none max-w-full`}
                                         value={dateRange.end}
                                         onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                                        style={{ minWidth: '100%' }}
                                     />
                                 </div>
                             </div>
@@ -153,8 +159,8 @@ const Report = () => {
                         {/* Reports List */}
                         <div className="space-y-6">
                             {Object.entries(groupedReports).map(([date, dateReports]) => (
-                                <div key={date} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                    <div className="bg-[#0054A6] px-6 py-4 border-b border-gray-200">
+                                <div key={date} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm overflow-hidden`}>
+                                    <div className="bg-[#0054A6] px-6 py-4 border-gray-200">
                                         <h3 className="text-lg font-semibold text-white">
                                             {new Date(date).toLocaleDateString('en-US', {
                                                 weekday: 'long',
@@ -164,13 +170,13 @@ const Report = () => {
                                             })}
                                         </h3>
                                     </div>
-                                    <div className="divide-y divide-gray-200">
+                                    <div className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                                         {dateReports.map((report) => (
-                                            <div key={report.id} className="p-6 hover:bg-gray-50 transition-colors">
+                                            <div key={report.id} className={`px-6 py-4 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div>
-                                                        <h4 className="text-lg font-medium text-gray-900">{report.projectName}</h4>
-                                                        <p className="text-sm text-gray-500">{report.jobType}</p>
+                                                        <h4 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{report.projectName}</h4>
+                                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{report.jobType}</p>
                                                     </div>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(report.status)}`}>
                                                         {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
@@ -178,16 +184,16 @@ const Report = () => {
                                                 </div>
                                                 <div className="space-y-4">
                                                     <div>
-                                                        <h5 className="text-sm font-medium text-gray-700 mb-2">Tasks:</h5>
-                                                        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                                        <h5 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Tasks:</h5>
+                                                        <ul className="list-disc list-inside space-y-1 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}">
                                                             {report.tasks.map((task, index) => (
-                                                                <li key={index}>{task}</li>
+                                                                <li key={index} className={darkMode ? 'text-gray-300' : 'text-gray-600'}>{task}</li>
                                                             ))}
                                                         </ul>
                                                     </div>
                                                     <div>
-                                                        <h5 className="text-sm font-medium text-gray-700 mb-1">Remarks:</h5>
-                                                        <p className="text-sm text-gray-600">{report.remark}</p>
+                                                        <h5 className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Remarks:</h5>
+                                                        <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{report.remark}</p>
                                                     </div>
                                                 </div>
                                             </div>

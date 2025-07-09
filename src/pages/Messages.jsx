@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { useTheme } from '../context/ThemeContext';
 
 const Messages = () => {
+    const { darkMode } = useTheme();
     const messagesRef = useRef(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState(null);
@@ -103,37 +105,41 @@ const Messages = () => {
     }, [selectedChat, message]);
 
     return (
-        <div className="fixed inset-0 flex flex-col">
+        <div className={`fixed inset-0 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
             <div className={`${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
                 <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
             </div>
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <div className="flex-1 flex lg:pl-64 mt-16 overflow-y-auto">
+            <div className={`flex-1 flex lg:pl-64 mt-16 overflow-y-auto ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 {/* Chat List Section */}
-                <div className={`w-full md:w-80 bg-white border-r border-gray-200 flex flex-col ${showMobileChat ? 'hidden md:flex' : 'flex'}`}>
+                <div className={`w-full md:w-80 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r flex flex-col ${showMobileChat ? 'hidden md:flex' : 'flex'}`}>
                     {/* Search Header */}
-                    <div className="p-4 border-b border-gray-200 bg-white">
+                    <div className={`p-4 border-b ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
                         <div className="relative">
                             <input
                                 type="text"
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                className={`w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'} border`}
                                 placeholder="Search messages..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-400'} absolute left-3 top-3`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                     </div>
 
                     {/* Chat List - Scrollable */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className={`flex-1 overflow-y-auto ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                         {filteredChats.map(chat => (
                             <div
                                 key={chat.id}
-                                className={`p-4 hover:bg-gray-200 cursor-pointer transition-colors ${selectedChat?.id === chat.id ? 'bg-gray-200' : ''}`}
+                                className={`p-4 cursor-pointer transition-colors ${selectedChat?.id === chat.id
+                                    ? (darkMode ? 'bg-gray-700' : 'bg-gray-200')
+                                    : ''} ${darkMode
+                                        ? 'hover:bg-gray-700'
+                                        : 'hover:bg-gray-200'}`}
                                 onClick={() => handleChatSelect(chat)}
                             >
                                 <div className="flex items-center gap-3">
@@ -147,11 +153,11 @@ const Messages = () => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
-                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{chat.name}</h3>
-                                            <span className="text-xs text-gray-500 ml-2">{chat.time}</span>
+                                            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} truncate`}>{chat.name}</h3>
+                                            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-2`}>{chat.time}</span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm text-gray-500 truncate">{chat.lastMessage}</p>
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>{chat.lastMessage}</p>
                                             {chat.unread > 0 && (
                                                 <div className="bg-[#0054A6] text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center ml-2 flex-shrink-0">
                                                     {chat.unread}
@@ -167,16 +173,16 @@ const Messages = () => {
 
                 {/* Chat Area */}
                 {selectedChat ? (
-                    <div className={`w-full md:flex-1 flex flex-col bg-gray-50 h-full ${showMobileChat ? 'flex' : 'hidden md:flex'} ${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
+                    <div className={`w-full md:flex-1 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} h-full ${showMobileChat ? 'flex' : 'hidden md:flex'} ${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
 
                         {/* Chat Header - Sticky */}
-                        <div className="sticky top-0 z-10 bg-white border-y border-gray-200">
+                        <div className={`sticky top-0 z-10 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-y`}>
                             <div className="p-4 flex items-center space-x-3">
                                 <button
                                     onClick={handleBackToList}
-                                    className="md:hidden p-2 hover:bg-gray-100 rounded-full"
+                                    className={`md:hidden p-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-full`}
                                 >
-                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className={`w-5 h-5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
@@ -189,8 +195,8 @@ const Messages = () => {
                                     )}
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-medium text-gray-900">{selectedChat.name}</h2>
-                                    <p className="text-sm text-gray-500">
+                                    <h2 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{selectedChat.name}</h2>
+                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                                         {selectedChat.online ? 'Online' : 'Offline'}
                                     </p>
                                 </div>
@@ -198,13 +204,17 @@ const Messages = () => {
                         </div>
 
                         {/* Messages - Scrollable Between Header & Input */}
-                        <div ref={messagesRef} className="flex-1 overflow-y-auto p-4 space-y-4 scroll-pb-32">
+                        <div ref={messagesRef} className={`flex-1 overflow-y-auto p-4 space-y-4 scroll-pb-32 ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                             {selectedChat.messages.map(msg => (
                                 <div key={msg.id} className={`flex ${msg.sent ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[70%] rounded-lg p-3 ${msg.sent ? 'bg-[#0054A6] text-white' : 'bg-gray-200 text-gray-900'}`}>
+                                    <div className={`max-w-[70%] rounded-lg p-3 ${msg.sent
+                                        ? 'bg-[#0054A6] text-white'
+                                        : (darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900')}`}>
                                         <p className="text-sm">{msg.text}</p>
                                         <div className='flex justify-between'>
-                                            <p className={`text-xs mt-1 ${msg.sent ? 'text-blue-100' : 'text-gray-500'}`}>{msg.time}</p>
+                                            <p className={`text-xs mt-1 ${msg.sent
+                                                ? 'text-blue-100'
+                                                : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>{msg.time}</p>
                                             <p className={`text-xs mt-1`}>{msg.sent &&
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-green-500 ml-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -218,11 +228,11 @@ const Messages = () => {
                         </div>
 
                         {/* Message Input - Sticky */}
-                        <div className="sticky bottom-0 p-4 bg-white border-t border-gray-200 z-10">
+                        <div className={`sticky bottom-0 p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t z-10`}>
                             <form onSubmit={handleSendMessage} className="flex space-x-4">
                                 <input
                                     type="text"
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                    className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                                     placeholder="Type a message..."
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
@@ -241,14 +251,14 @@ const Messages = () => {
                     </div>
 
                 ) : (
-                    <div className={`w-full pt-4 md:pt-0 md:flex-1 flex flex-col bg-gray-50 h-full ${showMobileChat ? 'flex' : 'hidden md:flex'} ${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
+                    <div className={`w-full pt-4 md:pt-0 md:flex-1 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} h-full ${showMobileChat ? 'flex' : 'hidden md:flex'} ${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
                         <div className="flex-1 flex items-center justify-center">
                             <div className="text-center">
-                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-16 h-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                <h3 className="text-lg font-medium text-gray-900">Select a chat to start messaging</h3>
-                                <p className="text-gray-500 mt-1">Choose from your existing conversations</p>
+                                <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Select a chat to start messaging</h3>
+                                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Choose from your existing conversations</p>
                             </div>
                         </div>
                     </div>

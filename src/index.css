@@ -13,7 +13,13 @@ body {
   margin: 0;
   padding: 0;
   --tw-font-weight: var(--font-weight-medium);
-  font-weight: var(--font-weight-medium)
+  font-weight: var(--font-weight-medium);
+}
+
+/* Dark mode styles */
+.dark body {
+  background-color: #1a1a1a;
+  color: #f3f4f6;
 }
 
 input,
@@ -52,11 +58,33 @@ button {
   scrollbar-color: #888 transparent;
 }
 
-/* Optional dark mode style */
-.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+/* Dark mode scrollbar style */
+.dark .custom-scrollbar-dark::-webkit-scrollbar-thumb {
   background-color: #444;
 }
 
-.custom-scrollbar-dark {
+.dark .custom-scrollbar-dark {
   scrollbar-color: #444 transparent;
+}
+
+/* Dark mode form elements */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #2d3748;
+  color: #f7fafc;
+  border-color: #4a5568;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #a0aec0;
+}
+
+/* Dark mode focus styles */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #0054A6;
+  box-shadow: 0 0 0 2px rgba(0, 84, 166, 0.3);
 }

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { useTheme } from '../context/ThemeContext';
 
 const CarBooking = () => {
+    const { darkMode } = useTheme();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -42,28 +44,28 @@ const CarBooking = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'approved': return 'bg-green-100 text-green-800';
-            case 'rejected': return 'bg-red-100 text-red-800';
-            default: return 'bg-yellow-100 text-yellow-800';
+            case 'approved': return darkMode ? 'bg-green-900 text-green-100' : 'bg-green-100 text-green-800';
+            case 'rejected': return darkMode ? 'bg-red-900 text-red-100' : 'bg-red-100 text-red-800';
+            default: return darkMode ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-100 text-yellow-800';
         }
     };
 
     return (
-        <div className="fixed inset-0 flex flex-col bg-gray-50">
+        <div className={`fixed inset-0 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             <div className={`${isSidebarOpen ? 'backdrop-blur-sm' : ''} transition-all duration-300`}>
                 <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
             </div>
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <main className="flex-1 overflow-y-auto lg:pl-64 mt-16 custom-scrollbar-light">
+            <main className={`flex-1 overflow-y-auto lg:pl-64 mt-16 ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 <div className="p-5">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-7xl mx-auto">
                         {/* Header */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Car Booking
                             </h1>
-                            <button 
+                            <button
                                 onClick={() => setIsFormOpen(true)}
                                 className="px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors w-full sm:w-auto flex items-center justify-center gap-2"
                             >
@@ -77,12 +79,12 @@ const CarBooking = () => {
                         {/* Car Booking Form Modal */}
                         {isFormOpen && (
                             <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 px-4 sm:px-0">
-                                <div className="bg-white rounded-lg p-6 w-full max-w-md shadow border border-gray-200">
+                                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg p-6 w-full max-w-md shadow border`}>
                                     <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-xl font-semibold">New Car Booking</h2>
-                                        <button 
+                                        <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>New Car Booking</h2>
+                                        <button
                                             onClick={() => setIsFormOpen(false)}
-                                            className="text-gray-500 hover:text-gray-700"
+                                            className={`${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
                                         >
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -91,8 +93,8 @@ const CarBooking = () => {
                                     </div>
                                     <form className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
-                                            <select className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Vehicle Type</label>
+                                            <select className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
                                                 <option>Company Ferry</option>
                                                 <option>Sedan</option>
                                                 <option>Van</option>
@@ -100,34 +102,34 @@ const CarBooking = () => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
-                                            <input 
-                                                type="text" 
-                                                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Purpose</label>
+                                            <input
+                                                type="text"
+                                                className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                                 placeholder="e.g., Client Meeting, Site Visit"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                                            <input 
-                                                type="text" 
-                                                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Destination</label>
+                                            <input
+                                                type="text"
+                                                className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                                 placeholder="Enter destination"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
-                                                <input 
-                                                    type="datetime-local" 
-                                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent" 
+                                                <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>Start Date & Time</label>
+                                                <input
+                                                    type="datetime-local"
+                                                    className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
-                                                <input 
-                                                    type="datetime-local" 
-                                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent" 
+                                                <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>End Date & Time</label>
+                                                <input
+                                                    type="datetime-local"
+                                                    className={`w-full h-10 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                                 />
                                             </div>
                                         </div>
@@ -135,7 +137,7 @@ const CarBooking = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsFormOpen(false)}
-                                                className="px-4 py-2 border border-gray-300 rounded-lg text-white bg-red-600 hover:bg-red-700/80 transition-colors"
+                                                className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700/80 transition-colors"
                                             >
                                                 Cancel
                                             </button>
@@ -152,33 +154,33 @@ const CarBooking = () => {
                         )}
 
                         {/* Available Vehicles */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                            <h2 className="text-lg font-semibold mb-4">Available Cars</h2>
+                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
+                            <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Available Cars</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div className="p-4 bg-blue-50 rounded-lg">
-                                    <p className="text-sm text-gray-600">Company Ferry</p>
+                                <div className={`p-4 ${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} rounded-lg`}>
+                                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Company Ferry</p>
                                     <p className="text-2xl font-bold text-[#0054A6]">2 Available</p>
                                 </div>
-                                <div className="p-4 bg-green-50 rounded-lg">
-                                    <p className="text-sm text-gray-600">Sedan</p>
-                                    <p className="text-2xl font-bold text-green-600">3 Available</p>
+                                <div className={`p-4 ${darkMode ? 'bg-green-900/30' : 'bg-green-50'} rounded-lg`}>
+                                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Sedan</p>
+                                    <p className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>3 Available</p>
                                 </div>
-                                <div className="p-4 bg-purple-50 rounded-lg">
-                                    <p className="text-sm text-gray-600">Van</p>
-                                    <p className="text-2xl font-bold text-purple-600">1 Available</p>
+                                <div className={`p-4 ${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'} rounded-lg`}>
+                                    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Van</p>
+                                    <p className={`text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>1 Available</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Booking Requests List */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <div className="divide-y divide-gray-200">
+                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm overflow-hidden`}>
+                            <div className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                                 {bookingRequests.map((request) => (
-                                    <div key={request.id} className="p-6 hover:bg-gray-50 transition-colors">
+                                    <div key={request.id} className={`p-6 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}>
                                         <div className="flex items-center justify-between mb-4">
                                             <div>
-                                                <h3 className="text-lg font-medium text-gray-900">{request.carType}</h3>
-                                                <p className="text-sm text-gray-500">Submitted on {request.submittedAt}</p>
+                                                <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{request.carType}</h3>
+                                                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Submitted on {request.submittedAt}</p>
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(request.status)}`}>
                                                 {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
@@ -186,16 +188,16 @@ const CarBooking = () => {
                                         </div>
                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <p className="text-gray-500">Purpose</p>
-                                                <p className="font-medium">{request.purpose}</p>
-                                                <p className="text-gray-500 mt-2">Destination</p>
-                                                <p className="font-medium">{request.destination}</p>
+                                                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Purpose</p>
+                                                <p className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{request.purpose}</p>
+                                                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2`}>Destination</p>
+                                                <p className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{request.destination}</p>
                                             </div>
                                             <div>
-                                                <p className="text-gray-500">Duration</p>
-                                                <p className="font-medium">{request.startDateTime}</p>
-                                                <p className="font-medium">to</p>
-                                                <p className="font-medium">{request.endDateTime}</p>
+                                                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Duration</p>
+                                                <p className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{request.startDateTime}</p>
+                                                <p className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>to</p>
+                                                <p className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{request.endDateTime}</p>
                                             </div>
                                         </div>
                                     </div>
