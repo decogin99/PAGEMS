@@ -2,42 +2,45 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import pagLogo from "../assets/PAG_Icon_Transparent.png";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
     const { darkMode, toggleDarkMode } = useTheme();
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
         username: "",
-        password: ""
+        password: "",
+        rememberMe: false,
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        setError(""); // Clear error when user types
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setFormData({
+            ...formData,
+            [e.target.name]: value
+          });
+        setError("");
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        // Check static credentials
-        if (formData.username === "admin" && formData.password === "admin") {
-            setTimeout(() => {
-                setLoading(false);
+        try {
+            const response = await login(formData.username, formData.password, formData.rememberMe);
+            if (response.success) {
                 navigate("/dashboard");
-            }, 1000);
-        } else {
-            setTimeout(() => {
-                setLoading(false);
-                setError("Invalid username or password");
-            }, 1000);
+            } else {
+                setError(response.message);
+            }
+        } catch {
+            setError("An unexpected error occurred");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -78,7 +81,7 @@ const Login = () => {
 
                 <form className="space-y-4" onSubmit={handleLogin}>
                     {error && (
-                        <div className="bg-red-500 text-white text-sm py-3 px-4 rounded-lg border border-red-200">
+                        <div className="bg-red-500 text-white text-sm py-3 px-4 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -127,6 +130,10 @@ const Login = () => {
                         <label className="flex items-center gap-2 cursor-pointer select-none">
                             <input
                                 type="checkbox"
+                                id="rememberMe"
+                                name="rememberMe"
+                                checked={formData.rememberMe}
+                                onChange={handleChange}
                                 className="accent-[#0054A6] w-4 h-4"
                                 disabled={loading}
                             />
