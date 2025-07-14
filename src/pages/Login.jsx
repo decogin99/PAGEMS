@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import pagLogo from "../assets/PAG_Icon_Transparent.png";
 import { useTheme } from "../context/ThemeContext";
@@ -21,7 +21,7 @@ const Login = () => {
         setFormData({
             ...formData,
             [e.target.name]: value
-          });
+        });
         setError("");
     };
 

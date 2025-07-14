@@ -1,10 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = ({ onMenuClick }) => {
     const navigate = useNavigate();
     const { darkMode } = useTheme();
+    const { user } = useAuth();
+
+    const employeeName = user?.employeeName || 'User';
+    const departmentSection = user?.departmentSection || '';
 
     return (
         <nav className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b fixed w-full z-30 shadow`}>
@@ -20,7 +25,9 @@ const Navbar = ({ onMenuClick }) => {
                             </svg>
                         </button>
                         <div className="flex items-center">
-                            <span className={`${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold`}>IT Department</span>
+                            <span className={`${darkMode ? 'text-gray-200' : 'text-gray-700'} font-semibold`}>
+                                {departmentSection === 'Development' ? 'Development' : `${departmentSection} Department`}
+                            </span>
                         </div>
                     </div>
 
@@ -36,7 +43,7 @@ const Navbar = ({ onMenuClick }) => {
                                 </button>
 
                                 {/* Red Dot Notification */}
-                                <span className={`absolute top-1 right-1 block h-2.5 md:h-3 w-2.5 md:w-3 rounded-full bg-red-600 ring-2 ${darkMode ? 'ring-gray-800' : 'ring-white'}`}></span>
+                                <span className={`absolute top-1.5 right-1.5 block h-2 md:h-2.5 w-2 md:w-2.5 rounded-full bg-red-600 ring-2 ${darkMode ? 'ring-gray-800' : 'ring-white'}`}></span>
                             </div>
 
                             <button
@@ -55,10 +62,10 @@ const Navbar = ({ onMenuClick }) => {
                                     md:group-hover:bg-white md:group-hover:text-[#0054A6] 
                                     group-hover:bg-[#004080] group-hover:text-white 
                                     transition-colors me-0 sm:me-2">
-                                        <span className='text-xs'>TH</span>
+                                        <span>{employeeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</span>
                                     </div>
                                     <span className={`hidden md:block text-sm font-medium ${darkMode ? 'text-gray-300 group-hover:text-white' : 'text-gray-700 group-hover:text-white'} transition-colors pe-1`}>
-                                        Thu Htoo Aung
+                                        {employeeName}
                                     </span>
                                 </button>
                             </div>

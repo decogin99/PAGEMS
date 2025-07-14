@@ -1,17 +1,27 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
 import Activities from "./pages/Activities";
 import Employees from "./pages/Employees";
-import Report from "./pages/Report";
+// import Report from "./pages/Report"; // No longer using this
 import Leave from "./pages/Leave";
 import CarBooking from "./pages/CarBooking";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
+import NoPermissionPage from "./pages/NoPermissionPage";
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
+
+// Import Report Views
+import Report_BOD from "./pages/Report_BOD";
+import Report_IT from "./pages/Report_IT";
+import Report_Software from "./pages/Report_Software";
+import Report_Design from "./pages/Report_Design";
+import Report_Factory from "./pages/Report_Factory";
+import Report_Finance from "./pages/Report_Finance";
+import Report_HRAdmin from "./pages/Report_HRAdmin";
+import Report_Marketing from "./pages/Report_Marketing";
 
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ children }) => {
@@ -28,6 +38,36 @@ const PrivateRoute = ({ children }) => {
   return children;
 };
 
+
+const PermissionRoute = ({ children, requiredPermission, requiredValue }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has the required permission
+  // Special case for dailyReportView which is a string, not a boolean
+  if (requiredPermission === 'dailyReportView') {
+    if (!user.permissions ||
+      (requiredValue && user.permissions[requiredPermission] !== requiredValue &&
+        user.permissions[requiredPermission] !== 'All')) {
+      return <NoPermissionPage />;
+    }
+  } else {
+    // For all other permissions which are booleans
+    if (!user.permissions || !user.permissions[requiredPermission]) {
+      return <NoPermissionPage />;
+    }
+  }
+
+  return children;
+};
+
 const App = () => {
   return (
     <AuthProvider>
@@ -38,57 +78,114 @@ const App = () => {
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="dashboardView">
                 <Dashboard />
-              </PrivateRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/announcements"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="announcementView">
                 <Announcements />
-              </PrivateRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/activities"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="activityView">
                 <Activities />
-              </PrivateRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/leave"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="leaveView">
                 <Leave />
-              </PrivateRoute>
+              </PermissionRoute>
+            }
+          />
+          {/* Report Routes */}
+          <Route
+            path="/report/bod"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="BOD">
+                <Report_BOD />
+              </PermissionRoute>
             }
           />
           <Route
-            path="/report"
+            path="/report/it"
             element={
-              <PrivateRoute>
-                <Report />
-              </PrivateRoute>
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="IT">
+                <Report_IT />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/software"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Software">
+                <Report_Software />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/design"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Design">
+                <Report_Design />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/factory"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Factory">
+                <Report_Factory />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/finance"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Finance">
+                <Report_Finance />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/hradmin"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="HRAdmin">
+                <Report_HRAdmin />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/report/marketing"
+            element={
+              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Marketing">
+                <Report_Marketing />
+              </PermissionRoute>
             }
           />
           <Route
             path="/carbooking"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="carBookingView">
                 <CarBooking />
-              </PrivateRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="/employees"
             element={
-              <PrivateRoute>
+              <PermissionRoute requiredPermission="employeeView">
                 <Employees />
-              </PrivateRoute>
+              </PermissionRoute>
             }
           />
           <Route

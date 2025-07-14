@@ -1,85 +1,48 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const axiosInstance = axios.create({
-    baseURL: API_URL,
-    withCredentials: true,
-    timeout: 10000,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    }
-});
-
-const makeApiRequest = async (apiCall, timeout = 10000) => {
-    return Promise.race([
-        apiCall,
-        new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Request timeout')), timeout)
-        )
-    ]);
-};
-
-const handleNetworkError = (error) => {
-    if (error.message === 'Request timeout') {
-        console.error('Request timed out.');
-        return 'Request timed out.';
-    } else if (!navigator.onLine) {
-        console.error('No internet connection.');
-        return 'No internet connection.';
-    } else if (error.code === 'ERR_NETWORK') {
-        console.error('Cannot reach the server.');
-        return 'Cannot reach the server.';
-    } else {
-        console.error('An unexpected error occurred:', error);
-        return error.response?.data?.message || 'An unexpected error occurred.';
-    }
-};
+import apiService from './apiService';
 
 class AuthService {
     async login(username, password, rememberMe = false) {
-        try {
-            const response = await makeApiRequest(
-                axiosInstance.post('/api/Auth/login', { 
-                    username, 
-                    password,
-                    rememberMe
-                })
-            );
-            
-            if (response?.data) {
-                localStorage.setItem('user', JSON.stringify(response.data));
+        const response = await apiService.post('/Auth/login', {
+            username,
+            password,
+            rememberMe
+        });
+
+        if (response.success && response.data) {
+            // Store the entire user info object
+            localStorage.setItem('user', JSON.stringify(response.data.userInfo || response.data));
+        }
+        return response;
+    }
+
+    async fetchAccountPermissions() {
+        const response = await apiService.get('/Account/getPermissions');
+
+        if (response.success && response.data) {
+            const currentUser = this.getCurrentUser();
+            if (currentUser) {
+                // The permissions are directly in response.data now, not in response.data.data
+                currentUser.permissions = response.data;
+                localStorage.setItem('user', JSON.stringify(currentUser));
+
                 return {
                     success: true,
-                    data: response.data,
-                    message: 'Login successful'
+                    data: currentUser,
+                    message: 'Permissions updated successfully'
                 };
             }
-            return {
-                success: false,
-                message: 'Invalid response from server'
-            };
-        } catch (error) {
-            console.error('Login error:', error);
-            const errorMessage = error.response?.data?.message 
-                || error.response?.statusText 
-                || handleNetworkError(error);
-            return {
-                success: false,
-                message: errorMessage
-            };
         }
+        return response;
     }
 
     async logout() {
         try {
             // Remove user from local storage
             localStorage.removeItem('user');
-            
+
             // Optional: Call logout endpoint if available
-            // await axiosInstance.post('/api/Auth/logout');
-            
+            // await apiService.post('/api/Auth/logout');
+
             return {
                 success: true,
                 message: 'Logout successful'
@@ -88,7 +51,7 @@ class AuthService {
             console.error('Logout error:', error);
             return {
                 success: false,
-                message: handleNetworkError(error)
+                message: error.message || 'Logout failed'
             };
         }
     }

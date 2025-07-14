@@ -16,11 +16,10 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, password, rememberMe = false) => {
-        console.log(rememberMe)
         const response = await authService.login(username, password, rememberMe);
         if (response.success && response.data) {
-            localStorage.setItem('user', JSON.stringify(response.data));
-            setUser(response.data);
+            localStorage.setItem('user', JSON.stringify(response.data.userInfo));
+            setUser(response.data.userInfo);
         }
         return response;
     };
@@ -30,8 +29,16 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const fetchAccountPermissions = async () => {
+        const response = await authService.fetchAccountPermissions();
+        if (response.success && response.data) {
+            setUser(response.data);
+        }
+        return response;
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, fetchAccountPermissions }}>
             {!loading && children}
         </AuthContext.Provider>
     );

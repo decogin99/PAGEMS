@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext'; // Add this import
 
 const Dashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { darkMode } = useTheme();
+    const { fetchAccountPermissions } = useAuth();
+
+
+    useEffect(() => {
+        fetchAccountPermissions();
+    }, []);
+
+    useEffect(() => {
+        document.title = "Dashboard";
+        return () => {
+            document.title = "PAGEMS";
+        };
+    }, []);
 
     return (
         <div className={`fixed inset-0 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>

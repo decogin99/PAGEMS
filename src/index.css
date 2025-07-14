@@ -67,6 +67,19 @@ button {
   scrollbar-color: #444 transparent;
 }
 
+/* Hide scrollbar for sidebar - works in Chrome, Edge, Safari */
+.sidebar-no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
+
+/* Hide scrollbar for sidebar - works in Firefox */
+.sidebar-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* For Internet Explorer and Edge */
+}
+
 /* Dark mode form elements */
 .dark input,
 .dark textarea,

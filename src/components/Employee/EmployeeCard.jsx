@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 
-const EmployeeCard = ({ employee, darkMode }) => {
+const EmployeeCard = ({ employee }) => {
     const navigate = useNavigate();
+    const { darkMode } = useTheme();
 
     return (
         <div className={`${darkMode ? 'bg-gray-800 hover:shadow-gray-700/10' : 'bg-white hover:shadow-md'} rounded-lg shadow-sm overflow-hidden transition-shadow`}>
@@ -28,15 +30,20 @@ const EmployeeCard = ({ employee, darkMode }) => {
                     </div>
                     <div className={`flex items-center text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        {employee.email}
+                        {new Date(employee.joinedDate).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "2-digit"
+                        })}
                     </div>
                     <div className={`flex items-center text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                         </svg>
-                        {employee.phone}
+
+                        {employee.employeeStatus}
                     </div>
                 </div>
                 <div className="flex justify-between mt-6 gap-2">
