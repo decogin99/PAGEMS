@@ -16,7 +16,7 @@ class SignalRService {
         if (this.connection) return;
 
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${API_URL.replace('/api', '')}/hubs/activity`)
+            .withUrl(`${API_URL.replace('/api', '')}/hubs/main`)
             .withAutomaticReconnect()
             .build();
 

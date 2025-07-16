@@ -100,7 +100,7 @@ const ActivityCard = ({ activity, onEdit, onDelete, onToggleComments, showCommen
 
                         {/* Options dropdown */}
                         {showOptions && (
-                            <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-10 ${darkMode ? 'bg-gray-700' : 'bg-white'} ring-1 ring-gray-300 ring-opacity-5 focus:outline-none`}>
+                            <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-10 ${darkMode ? 'bg-gray-700' : 'bg-white ring-1 ring-gray-300'}  ring-opacity-5 focus:outline-none`}>
                                 <button
                                     onClick={handleEdit}
                                     className={`block px-4 py-2 text-sm w-full text-left ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}

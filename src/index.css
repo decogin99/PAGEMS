@@ -32,6 +32,11 @@ button {
   cursor: pointer;
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: #0054A6;
+}
+
 /* Custom scrollbar for light mode */
 .custom-scrollbar-light::-webkit-scrollbar {
   width: 8px;

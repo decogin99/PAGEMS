@@ -209,7 +209,7 @@ const Employees = () => {
 
                                 {/* Pagination */}
                                 {employees.length > 0 && (
-                                    <div className="flex flex-col items-center mt-3 space-y-3">
+                                    <div className="flex flex-col items-center mt-6 space-y-3">
 
                                         <div className="flex justify-center space-x-1">
                                             <button

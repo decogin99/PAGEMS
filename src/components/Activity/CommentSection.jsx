@@ -32,7 +32,7 @@ const CommentSection = ({ activityId, initialCommentCount = 0, showComments, set
             if (commentData.activityId === activityId) {
                 // Fetch the latest comments when a new comment is added
                 if (showComments) {
-                    fetchComments();
+                    fetchComments(false);
                 }
                 // Update comment count
                 setCommentCount(commentData.commentCount);
@@ -64,16 +64,15 @@ const CommentSection = ({ activityId, initialCommentCount = 0, showComments, set
     }, [initialCommentCount]);
 
     // When fetching comments, only update the count if we have comments
-    const fetchComments = async () => {
+    const fetchComments = async (showLoading) => {
         if (!activityId) return;
 
-        setLoading(true);
+        if (showLoading)
+            setLoading(true);
         try {
             const response = await activityService.getComments(activityId);
             if (response.success) {
                 setComments(response.data || []);
-                // Don't update the comment count if the response data is empty
-                // This prevents the count from being reset to 0 when there are no comments
                 if (response.data && response.data.length > 0) {
                     setCommentCount(response.data.length);
                 }

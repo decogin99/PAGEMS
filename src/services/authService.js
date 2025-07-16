@@ -35,6 +35,17 @@ class AuthService {
         return response;
     }
 
+    async checkAccountStatus() {
+        // Get the current user's account ID
+        const currentUser = this.getCurrentUser();
+        if (!currentUser || !currentUser.accountId) {
+            return { success: false, message: 'No user logged in' };
+        }
+
+        // Call the API to check if the account is still active
+        return await apiService.get(`/Account/checkStatus/${currentUser.accountId}`);
+    }
+
     async logout() {
         try {
             // Remove user from local storage

@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Announcements from "./pages/Announcements";
 import Activities from "./pages/Activities";
 import Employees from "./pages/Employees";
-// import Report from "./pages/Report"; // No longer using this
+import Accounts from "./pages/Accounts";
 import Leave from "./pages/Leave";
 import CarBooking from "./pages/CarBooking";
 import Messages from "./pages/Messages";
@@ -173,18 +173,26 @@ const App = () => {
             }
           />
           <Route
-            path="/carbooking"
-            element={
-              <PermissionRoute requiredPermission="carBookingView">
-                <CarBooking />
-              </PermissionRoute>
-            }
-          />
-          <Route
             path="/employees"
             element={
               <PermissionRoute requiredPermission="employeeView">
                 <Employees />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/accounts"
+            element={
+              <PermissionRoute requiredPermission="employeeView">
+                <Accounts />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/carbooking"
+            element={
+              <PermissionRoute requiredPermission="carBookingView">
+                <CarBooking />
               </PermissionRoute>
             }
           />
