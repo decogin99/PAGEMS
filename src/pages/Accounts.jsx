@@ -145,24 +145,55 @@ const Accounts = () => {
     };
 
     const handlePermissions = async (accountId) => {
-        // Find the account to get current permissions
-        const account = accounts.find(acc => acc.accountId === accountId);
-        if (account) {
-            setAccountToUpdatePermissions(account);
-            setShowPermissionsModal(true);
-
-            // Example permission structure based on the image
-            // In a real implementation, you would fetch this from the API
-            setPermissionsData({
-                'Profile': { hasAccess: true, role: '-' },
-                'Dashboard': { hasAccess: true, role: '-' },
-                'Announcement': { hasAccess: true, role: 'View' },
-                'Activities': { hasAccess: true, role: 'View' },
-                'Employees': { hasAccess: true, role: 'Full Control' },
-                'User Accounts': { hasAccess: true, role: 'Full Control' },
-                'Reports': { hasAccess: true, role: 'Admin' },
-                'Car Booking': { hasAccess: true, role: 'User' }
-            });
+        try {
+            const account = accounts.find(acc => acc.accountId === accountId);
+            if (account) {
+                setAccountToUpdatePermissions(account);
+                setShowPermissionsModal(true);
+                
+                const response = await accountApi.getPermissions(accountId);
+                if (response.success) {
+                    // Transform API response to match PermissionManager's expected format
+                    const permissions = {
+                        'Profile': { hasAccess: true, role: '-' },
+                        'Dashboard': { hasAccess: response.data.dashboardView, role: '-' },
+                        'Announcement': { 
+                            hasAccess: response.data.announcementView, 
+                            role: response.data.announcementViewControl 
+                        },
+                        'Activities': { 
+                            hasAccess: response.data.activityView, 
+                            role: response.data.activityViewControl 
+                        },
+                        'Employees': { 
+                            hasAccess: response.data.employeeView, 
+                            role: response.data.employeeViewControl 
+                        },
+                        'User Accounts': { 
+                            hasAccess: response.data.userAccountView, 
+                            role: response.data.userAccountViewControl 
+                        },
+                        'Reports': {
+                            department: response.data.dailyReportView,
+                            role: response.data.dailyReportViewControl
+                        },
+                        'Leave': { 
+                            hasAccess: response.data.leaveView, 
+                            role: response.data.leaveViewControl 
+                        },
+                        'Car Booking': { 
+                            hasAccess: response.data.carBookingView, 
+                            role: response.data.carBookingViewControl 
+                        }
+                    };
+                    setPermissionsData(permissions);
+                } else {
+                    setError(response.message || 'Failed to fetch permissions');
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching permissions:', error);
+            setError('Failed to fetch permissions');
         }
     };
 

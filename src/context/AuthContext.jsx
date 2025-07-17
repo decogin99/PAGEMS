@@ -97,11 +97,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const fetchAccountPermissions = async () => {
-        const response = await authService.fetchAccountPermissions();
-        if (response.success && response.data) {
-            setUser(response.data);
+        try {
+            const permissions = await authService.fetchAccountPermissions();
+            if (permissions) {
+                setUser(prev => ({ ...prev, permissions }));
+            }
+        } catch (error) {
+            console.error('Error fetching account permissions:', error);
         }
-        return response;
     };
 
     return (

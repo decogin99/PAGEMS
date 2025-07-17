@@ -41,9 +41,13 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
 
     // Handle report department change
     const handleReportDepartmentChange = (value) => {
-        setReportDepartment(value);
-        // You might want to update the permissionData here as well
-        // depending on your application's requirements
+        setPermissionData(prev => ({
+            ...prev,
+            Reports: {
+                ...prev.Reports,
+                department: value
+            }
+        }));
     };
 
     // Handle save button click
@@ -52,8 +56,7 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
         try {
             // Include reportDepartment in the saved data
             const dataToSave = {
-                ...permissionData,
-                reportDepartment
+                ...permissionData
             };
             
             await onSave(dataToSave);
@@ -116,7 +119,7 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
                                 <div className="col-span-2 grid grid-cols-2 gap-4">
                                     <select
                                         className={`w-full p-2 rounded-md border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                                        value={reportDepartment}
+                                        value={value?.department || 'All'}
                                         onChange={(e) => handleReportDepartmentChange(e.target.value)}
                                     >
                                         {getReportDepartmentOptions()}

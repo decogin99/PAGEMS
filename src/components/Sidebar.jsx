@@ -30,7 +30,7 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
     // Define report views
     const reportViews = [
         { name: 'BOD', path: '/report/bod', component: 'Report_BOD' },
-        { name: 'HR/Admin', path: '/report/hradmin', component: 'Report_HRAdmin' },
+        { name: 'HR&Admin', path: '/report/hradmin', component: 'Report_HRAdmin' },
         { name: 'Finance', path: '/report/finance', component: 'Report_Finance' },
         { name: 'Marketing', path: '/report/marketing', component: 'Report_Marketing' },
         { name: 'Design', path: '/report/design', component: 'Report_Design' },
@@ -148,12 +148,23 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
 
     // Filter navigation items based on user permissions
     const filteredNavigation = navigation.filter(item => {
-        // Special case for dailyReportView which is a string, not a boolean
+        if (!permissions) return false;
+        
+        // Always show Profile
+        if (item.name === 'Profile') return true;
+
+        // Special case for Reports which uses department-based permissions
         if (item.permissionKey === 'dailyReportView') {
-            return permissions[item.permissionKey] === 'All' || permissions[item.permissionKey];
+            return permissions[item.permissionKey] && 
+                   (permissions[item.permissionKey] === 'All' || 
+                    permissions[item.permissionKey] === 'Admin' || 
+                    permissions[item.permissionKey] === 'User');
         }
-        // For all other permissions which are booleans
-        return permissions[item.permissionKey];
+
+        // For all other permissions
+        return permissions[item.permissionKey] === true || 
+               permissions[item.permissionKey] === 'View' || 
+               permissions[item.permissionKey] === 'Full Control';
     });
 
     return (

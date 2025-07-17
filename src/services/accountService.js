@@ -9,6 +9,10 @@ export const accountApi = {
         return apiService.put(`/Account/deactivate/${accountId}`);
     },
 
+    getPermissions: async (accountId) => {
+        return apiService.get(`/Account/getPermissions?accountId=${accountId}`);
+    },
+
     updatePermissions: async (accountId, permissions) => {
         return apiService.put('/Account/updatePermission', {
             accountId,
@@ -21,8 +25,8 @@ export const accountApi = {
             employeeViewControl: permissions.Employees?.role || 'Unset',
             userAccountView: permissions['User Accounts']?.hasAccess || false,
             userAccountViewControl: permissions['User Accounts']?.role || 'Unset',
-            dailyReportView: permissions.Reports?.role || 'Unset',
-            dailyReportViewControl: permissions.reportDepartment || 'All',
+            dailyReportView: permissions.Reports?.department || 'All',
+            dailyReportViewControl: permissions.Reports?.role || 'Unset',
             leaveView: permissions.Leave?.hasAccess || false,
             leaveViewControl: permissions.Leave?.role || 'Unset',
             carBookingView: permissions['Car Booking']?.hasAccess || false,
