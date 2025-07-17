@@ -161,9 +161,6 @@ const Accounts = () => {
                 'Employees': { hasAccess: true, role: 'Full Control' },
                 'User Accounts': { hasAccess: true, role: 'Full Control' },
                 'Reports': { hasAccess: true, role: 'Admin' },
-                'Quotation': { hasAccess: false, role: 'Unset' },
-                'Task': { hasAccess: false, role: 'Unset' },
-                'Customers': { hasAccess: false, role: 'Unset' },
                 'Car Booking': { hasAccess: true, role: 'User' }
             });
         }
@@ -171,21 +168,26 @@ const Accounts = () => {
 
     const handleSavePermissions = async (updatedPermissions) => {
         try {
-            // In a real implementation, you would call the API to update permissions
-            // const response = await accountApi.updatePermissions(accountToUpdatePermissions.accountId, updatedPermissions);
+            // Call the API to update permissions
+            const response = await accountApi.updatePermissions(
+                accountToUpdatePermissions.accountId,
+                updatedPermissions
+            );
 
-            console.log('Saving permissions for account:', accountToUpdatePermissions.accountId);
-            console.log('Updated permissions:', updatedPermissions);
+            if (response.success) {
+                // Close the modal after successful update
+                setShowPermissionsModal(false);
+                setAccountToUpdatePermissions(null);
+                setPermissionsData(null);
 
-            // Close the modal after successful update
-            setShowPermissionsModal(false);
-            setAccountToUpdatePermissions(null);
-            setPermissionsData(null);
-
-            // You might want to refresh the accounts list here
-            // fetchAccounts(currentPage);
+                // Refresh the accounts list
+                fetchAccounts(currentPage);
+            } else {
+                setError(response.message || 'Failed to update permissions');
+            }
         } catch (error) {
             console.error('Error updating permissions:', error);
+            setError('Failed to update permissions');
         }
     };
 
@@ -462,7 +464,7 @@ const Accounts = () => {
                 <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div className="flex items-center justify-center min-h-screen p-4 text-center">
                         <div className="fixed inset-0 backdrop-blur-sm bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-                        <div className={`relative -mr-4 inline-block align-middle ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-4xl w-full`}>
+                        <div className={`relative -mr-4 inline-block align-middle ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-4xl w-full`}>
                             <PermissionManager
                                 accountInfo={{
                                     name: accountToUpdatePermissions.employeeName,

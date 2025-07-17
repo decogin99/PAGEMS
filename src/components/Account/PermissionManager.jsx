@@ -50,13 +50,13 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
     const handleSave = async () => {
         setIsLoading(true);
         try {
-            // Include reportDepartment in the saved data if needed
+            // Include reportDepartment in the saved data
             const dataToSave = {
                 ...permissionData,
                 reportDepartment
             };
-            console.log(dataToSave)
-            // await onSave(dataToSave);
+            
+            await onSave(dataToSave);
         } catch (error) {
             console.error('Error saving permissions:', error);
         } finally {

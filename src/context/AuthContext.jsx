@@ -41,6 +41,42 @@ export const AuthProvider = ({ children }) => {
         }
     }, [user]);
 
+    // Add SignalR listener for permission updates
+    useEffect(() => {
+        if (user) {
+            // Set up listener for AccountDeactivated events
+            const unsubscribeDeactivated = signalRService.on('AccountDeactivated', async (accountId) => {
+                try {
+                    // Only check status if the updated account is the current user's account
+                    if (accountId && accountId === user.accountId) {
+                        setShowDisabledNotification(true);
+                    }
+                } catch (error) {
+                    console.error('Error checking account status:', error);
+                }
+            });
+
+            // Set up listener for PermissionUpdated events
+            const unsubscribePermissionUpdated = signalRService.on('PermissionUpdated', async (data) => {
+                try {
+                    // Only update permissions if the updated account is the current user's account
+                    if (data.accountId && data.accountId === user.accountId) {
+                        // Fetch updated permissions
+                        await fetchAccountPermissions();
+                    }
+                } catch (error) {
+                    console.error('Error updating permissions:', error);
+                }
+            });
+
+            // Clean up listeners when component unmounts or user changes
+            return () => {
+                unsubscribeDeactivated();
+                unsubscribePermissionUpdated();
+            };
+        }
+    }, [user]);
+
     const login = async (username, password, rememberMe = false) => {
         const response = await authService.login(username, password, rememberMe);
         if (response.success && response.data) {
