@@ -7,7 +7,7 @@ import Employees from "./pages/Employees";
 import Accounts from "./pages/Accounts";
 import Leave from "./pages/Leave";
 import CarBooking from "./pages/CarBooking";
-import Messages from "./pages/Messages";
+import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import NoPermissionPage from "./pages/NoPermissionPage";
 import { AuthProvider } from './context/AuthContext';
@@ -197,10 +197,10 @@ const App = () => {
             }
           />
           <Route
-            path="/messages"
+            path="/chat"
             element={
               <PrivateRoute>
-                <Messages />
+                <Chat />
               </PrivateRoute>
             }
           />

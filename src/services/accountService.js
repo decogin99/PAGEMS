@@ -30,7 +30,8 @@ export const accountApi = {
             leaveView: permissions.Leave?.hasAccess || false,
             leaveViewControl: permissions.Leave?.role || 'Unset',
             carBookingView: permissions['Car Booking']?.hasAccess || false,
-            carBookingViewControl: permissions['Car Booking']?.role || 'Unset'
+            carBookingViewControl: permissions['Car Booking']?.role || 'Unset',
+            chatView: permissions['Chat']?.hasAccess || false,
         });
     },
 

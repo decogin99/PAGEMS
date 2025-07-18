@@ -58,7 +58,7 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
             const dataToSave = {
                 ...permissionData
             };
-            
+
             await onSave(dataToSave);
         } catch (error) {
             console.error('Error saving permissions:', error);
@@ -86,7 +86,7 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
 
     // Check if the page should have a select dropdown
     const shouldHaveSelect = (key) => {
-        return key !== 'Profile' && key !== 'Dashboard';
+        return key !== 'Profile' && key !== 'Dashboard' && key !== 'Chat';
     };
 
     // Get department options for Reports

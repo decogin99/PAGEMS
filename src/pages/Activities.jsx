@@ -316,7 +316,7 @@ const Activities = () => {
             <main className={`flex-1 overflow-y-auto lg:pl-64 mt-16 ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 <div className="p-5">
                     <div className="max-w-2xl mx-auto"> {/* Reduced max-width for Instagram-like feed */}
-                        <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center justify-between mb-4">
                             <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Activities
                             </h1>

@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useTheme } from '../context/ThemeContext';
 
-const Messages = () => {
+const Chat = () => {
     const { darkMode } = useTheme();
     const messagesRef = useRef(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -268,4 +268,4 @@ const Messages = () => {
     );
 };
 
-export default Messages;
+export default Chat;

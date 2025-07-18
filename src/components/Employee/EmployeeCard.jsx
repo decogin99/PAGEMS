@@ -1,9 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const EmployeeCard = ({ employee }) => {
     const navigate = useNavigate();
     const { darkMode } = useTheme();
+    const { user } = useAuth();
+
+    const hasFullControl = user?.permissions?.employeeViewControl === 'Full Control';
 
     return (
         <div className={`${darkMode ? 'bg-gray-800 hover:shadow-gray-700/10' : 'bg-white hover:shadow-md'} rounded-lg shadow-sm overflow-hidden transition-shadow`}>
@@ -53,12 +57,16 @@ const EmployeeCard = ({ employee }) => {
                     >
                         Profile
                     </button>
-                    <button className={`flex-1 px-3 py-2 ${darkMode ? 'text-yellow-500 hover:bg-yellow-600 hover:text-white border-yellow-500' : 'text-yellow-600 hover:bg-yellow-600 hover:text-white border-yellow-600'} rounded-lg border transition-colors text-sm`}>
-                        Edit
-                    </button>
-                    <button className={`flex-1 px-3 py-2 ${darkMode ? 'text-red-500 hover:bg-red-600 hover:text-white border-red-500' : 'text-red-600 hover:bg-red-600 hover:text-white border-red-600'} rounded-lg border transition-colors text-sm`}>
-                        Delete
-                    </button>
+                    {hasFullControl && (
+                        <>
+                            <button className={`flex-1 px-3 py-2 ${darkMode ? 'text-yellow-500 hover:bg-yellow-600 hover:text-white border-yellow-500' : 'text-yellow-600 hover:bg-yellow-600 hover:text-white border-yellow-600'} rounded-lg border transition-colors text-sm`}>
+                                Edit
+                            </button>
+                            <button className={`flex-1 px-3 py-2 ${darkMode ? 'text-red-500 hover:bg-red-600 hover:text-white border-red-500' : 'text-red-600 hover:bg-red-600 hover:text-white border-red-600'} rounded-lg border transition-colors text-sm`}>
+                                Delete
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
