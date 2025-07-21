@@ -4,7 +4,6 @@ import Navbar from '../components/Navbar';
 import ActivityPostForm from '../components/Activity/ActivityPostForm';
 import ActivityEditForm from '../components/Activity/ActivityEditForm';
 import ActivityCard from '../components/Activity/ActivityCard';
-import CommentSection from '../components/Activity/CommentSection';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import activityService from '../services/activityService';
@@ -23,7 +22,7 @@ const Activities = () => {
 
     // State for activities
     const [activities, setActivities] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -33,7 +32,7 @@ const Activities = () => {
     const hasFullControl = user?.permissions?.activityViewControl === 'Full Control';
 
     // Function to fetch activities
-    const fetchActivities = async (page = 1) => {
+    const fetchActivities = async (page = 1, append = false) => {
         setLoading(true);
         setError(null);
 
@@ -41,19 +40,39 @@ const Activities = () => {
             const response = await activityService.getActivityList(page);
 
             if (response.success) {
-                setActivities(response.data.data || []);
+                // If append is true, add new activities to existing ones
+                // Otherwise, replace the activities list
+                if (append) {
+                    setActivities(prevActivities => [...prevActivities, ...(response.data.data || [])]);
+                } else {
+                    setActivities(response.data.data || []);
+                }
                 setTotalPages(response.data.totalPages || 1);
                 setCurrentPage(page);
             } else {
                 setError(response.message || 'Failed to fetch activities');
-                setActivities([]);
+                if (!append) {
+                    setActivities([]);
+                }
             }
         } catch (err) {
             console.error('Error fetching activities:', err);
             setError('An unexpected error occurred while fetching activities');
-            setActivities([]);
+            if (!append) {
+                setActivities([]);
+            }
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Function to load more activities
+    const loadMoreActivities = (e) => {
+        // Prevent default behavior that causes page to scroll to top
+        e.preventDefault();
+
+        if (currentPage < totalPages && !loading) {
+            fetchActivities(currentPage + 1, true);
         }
     };
 
@@ -176,7 +195,7 @@ const Activities = () => {
 
     // Fetch activities on component mount
     useEffect(() => {
-        fetchActivities(1);
+        fetchActivities(1, false);
     }, []);
 
     const handleToggleComments = (activityId) => {
@@ -236,13 +255,6 @@ const Activities = () => {
     const cancelDelete = () => {
         setShowDeleteConfirm(false);
         setActivityToDelete(null);
-    };
-
-    // Function to handle pagination
-    const handlePageChange = (newPage) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            fetchActivities(newPage);
-        }
     };
 
     return (
@@ -315,7 +327,7 @@ const Activities = () => {
 
             <main className={`flex-1 overflow-y-auto lg:pl-64 mt-16 ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 <div className="p-5">
-                    <div className="max-w-2xl mx-auto"> {/* Reduced max-width for Instagram-like feed */}
+                    <div className="max-w-2xl mx-auto">
                         <div className="flex items-center justify-between mb-4">
                             <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Activities
@@ -333,86 +345,18 @@ const Activities = () => {
                                 </button>
                             )}
                         </div>
-
-                        {/* Error message */}
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                                <p>{error}</p>
-                            </div>
-                        )}
-
-                        {/* Loading state */}
-                        {loading ? (
-                            <div className={`flex justify-center items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                <svg className="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Loading activities...</span>
-                            </div>
-                        ) : (
-                            <>
-                                {/* Activities list */}
-                                {activities.length > 0 ? (
-                                    <div className="space-y-6">
-                                        {activities.map((activity) => (
-                                            <div key={`${activity.activityId}-${activity.likeCount}-${activity.isLikedByCurrentUser}`}>
-                                                <ActivityCard
-                                                    activity={activity}
-                                                    onEdit={handleEditActivity}
-                                                    onDelete={handleDeleteClick}
-                                                    onToggleComments={handleToggleComments}
-                                                    showComments={!!openCommentSections[activity.activityId]}
-                                                />
-                                                {/* Render CommentSection outside of ActivityCard */}
-                                                {openCommentSections[activity.activityId] && (
-                                                    <CommentSection
-                                                        activityId={activity.activityId}
-                                                        initialCommentCount={activity.commentCount || 0}
-                                                        showComments={true}
-                                                        setShowComments={(show) => {
-                                                            if (!show) {
-                                                                setOpenCommentSections(prev => ({
-                                                                    ...prev,
-                                                                    [activity.activityId]: false
-                                                                }));
-                                                            }
-                                                        }}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className={`text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                        <p>No activities found!</p>
-                                    </div>
-                                )}
-
-                                {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <div className="flex justify-center mt-6 space-x-2">
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage === 1}
-                                            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#0054A6] text-white hover:bg-[#004080]'}`}
-                                        >
-                                            Previous
-                                        </button>
-                                        <span className={`px-3 py-1 ${darkMode ? 'text-white' : 'text-gray-700'}`}>
-                                            Page {currentPage} of {totalPages}
-                                        </span>
-                                        <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === totalPages}
-                                            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#0054A6] text-white hover:bg-[#004080]'}`}
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
+                        <ActivityCard
+                            activities={activities}
+                            loading={loading}
+                            error={error}
+                            handleEdit={handleEditActivity}
+                            handleDelete={handleDeleteClick}
+                            handleToggleComments={handleToggleComments}
+                            openCommentSections={openCommentSections}
+                            loadMoreActivities={loadMoreActivities}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                        />
                     </div>
                 </div>
             </main>

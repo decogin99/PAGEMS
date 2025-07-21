@@ -3,12 +3,12 @@ import apiService from './apiService';
 class AuthService {
     async login(username, password, rememberMe = false) {
         try {
-            const response = await apiService.post('/Auth/login', { 
-                username, 
+            const response = await apiService.post('/Auth/login', {
+                username,
                 password,
                 rememberMe
             });
-            
+
             if (response?.data) {
                 localStorage.setItem('user', JSON.stringify(response.data));
                 return {
@@ -50,7 +50,17 @@ class AuthService {
     }
 
     async logout() {
+        // Get the current user before removing from localStorage
+        const user = this.getCurrentUser();
+
+        // Remove user from localStorage
         localStorage.removeItem('user');
+
+        // Import and stop the SignalR connection
+        const signalRService = await import('./signalRService').then(module => module.default);
+        await signalRService.stopConnection();
+
+        return user;
     }
 
     getCurrentUser() {

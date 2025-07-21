@@ -5,7 +5,6 @@ const PermissionManager = ({ accountInfo, permissions, onSave, onCancel }) => {
     const { darkMode } = useTheme();
     const [permissionData, setPermissionData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
-    const [reportDepartment, setReportDepartment] = useState('All');
 
     // Initialize permission data when component mounts or permissions change
     useEffect(() => {

@@ -8,8 +8,9 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { darkMode, toggleDarkMode } = useTheme();
-    const { user, logout } = useAuth();
+    const { user, logout, onlineUsers, connectionStatus } = useAuth();
     const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     // Effect to handle forced open dropdown from Report_Software component
     useEffect(() => {
@@ -19,8 +20,18 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
     }, [forceOpenReportDropdown]);
 
     const permissions = user?.permissions || {};
+    const photo = user?.employeePhoto || null;
     const employeeName = user?.employeeName || 'User';
     const username = user?.username || '';
+
+    const userId = user?.accountId || '';
+    // Update isOnline to check both onlineUsers and connection status
+    const isOnline = userId && onlineUsers.has(userId) && connectionStatus === 'Connected';
+
+    // Generate initials from name
+    const getInitials = (name) => {
+        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    };
 
     const handleLogout = async () => {
         await logout();
@@ -103,7 +114,8 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
         {
             name: 'Reports',
             permissionKey: 'dailyReportView',
-            path: isReportsDropdown ? undefined : `/report/${permissions.dailyReportView.toLowerCase().replace('&', '')}`,
+            // Line 118 (in the navigation array)
+            path: isReportsDropdown ? undefined : (permissions.dailyReportView ? `/report/${permissions.dailyReportView.replace('&', '')}` : '/dashboard'),
             icon: (
                 <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V12Zm0 3h.008v.008H6.75V18Z" />
@@ -181,8 +193,29 @@ const Sidebar = ({ isOpen, onClose, forceOpenReportDropdown }) => {
                     {/* User Profile Section */}
                     <div className={`px-4 py-3 border-b ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
                         <div className="flex items-center space-x-3">
-                            <div className="h-10 w-10 rounded-full bg-[#0054A6] flex items-center justify-center text-white font-medium">
-                                <span>{employeeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</span>
+                            <div className='relative'>
+                                {photo && !imageError ? (
+                                    <img
+                                        src={photo}
+                                        alt={employeeName}
+                                        className="h-10 w-10 rounded-full object-cover"
+                                        onError={() => setImageError(true)}
+                                    />
+                                )
+                                    :
+                                    (
+                                        <div className="h-10 w-10 bg-[#0054A6] rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                            <span>{getInitials(employeeName)}</span>
+                                        </div>
+                                    )}
+
+                                {/* In the JSX where the online status indicator is rendered: */}
+                                {/* Online status indicator */}
+                                {isOnline ? (
+                                    <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                ) : (
+                                    <div className="absolute bottom-0 right-0 h-3 w-3 bg-gray-400 rounded-full border-2 border-white"></div>
+                                )}
                             </div>
                             <div className="flex flex-col">
                                 <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{employeeName}</span>

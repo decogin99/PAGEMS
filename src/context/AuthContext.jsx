@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import authService from '../services/authService';
 import signalRService from '../services/signalRService';
 import { useTheme } from './ThemeContext';
@@ -9,73 +9,153 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showDisabledNotification, setShowDisabledNotification] = useState(false);
+    const [onlineUsers, setOnlineUsers] = useState(new Set());
+    const [connectionStatus, setConnectionStatus] = useState('Disconnected');
     const { darkMode } = useTheme();
+    const userOfflineTimeouts = useRef({});
 
     useEffect(() => {
-        const user = authService.getCurrentUser();
-        if (user) {
-            setUser(user);
-        }
-        setLoading(false);
+        const initializeUser = async () => {
+            const user = authService.getCurrentUser();
+            if (user) {
+                setUser(user);
+                setOnlineUsers(prev => new Set([...prev, user.accountId]));
+
+                // Always fetch permissions on initial load to ensure they're up to date
+                try {
+                    const permissions = await authService.fetchAccountPermissions();
+                    if (permissions) {
+                        setUser(prev => ({ ...prev, permissions }));
+                    }
+                } catch (error) {
+                    console.error('Error fetching permissions:', error);
+                }
+            }
+            setLoading(false);
+        };
+
+        initializeUser();
     }, []);
 
-    // Add SignalR listener for account updates
+    // Monitor SignalR connection status
     useEffect(() => {
-        if (user) {
-            // Set up listener for AccountUpdate events
-            const unsubscribe = signalRService.on('AccountDeactivated', async (accountId) => {
-                try {
-                    // Only check status if the updated account is the current user's account
-                    if (accountId && accountId === user.accountId) {
-                        setShowDisabledNotification(true);
-                    }
-                } catch (error) {
-                    console.error('Error checking account status:', error);
-                }
-            });
+        if (!user) return;
 
-            // Clean up listener when component unmounts or user changes
-            return () => {
-                unsubscribe();
-            };
-        }
+        const onConnected = () => setConnectionStatus('Connected');
+        const onDisconnected = () => setConnectionStatus('Disconnected');
+        const onReconnecting = () => setConnectionStatus('Reconnecting');
+
+        // Set initial status
+        const checkConnectionStatus = () => {
+            if (!signalRService.connection) {
+                setConnectionStatus('Disconnected');
+                return;
+            }
+            setConnectionStatus(signalRService.connection.state);
+        };
+
+        // Check status immediately
+        checkConnectionStatus();
+
+        // Register connection status listeners
+        signalRService.connection?.onclose(onDisconnected);
+        signalRService.connection?.onreconnecting(onReconnecting);
+        signalRService.connection?.onreconnected(onConnected);
+
+        // Check status periodically - this is important to keep
+        const intervalId = setInterval(checkConnectionStatus, 1000);
+
+        return () => {
+            clearInterval(intervalId);
+            // SignalR doesn't provide a direct way to remove these listeners
+        };
     }, [user]);
 
-    // Add SignalR listener for permission updates
+    // Handle online/offline users
     useEffect(() => {
-        if (user) {
-            // Set up listener for AccountDeactivated events
-            const unsubscribeDeactivated = signalRService.on('AccountDeactivated', async (accountId) => {
-                try {
-                    // Only check status if the updated account is the current user's account
-                    if (accountId && accountId === user.accountId) {
-                        setShowDisabledNotification(true);
-                    }
-                } catch (error) {
-                    console.error('Error checking account status:', error);
-                }
-            });
+        if (!user) return;
 
-            // Set up listener for PermissionUpdated events
-            const unsubscribePermissionUpdated = signalRService.on('PermissionUpdated', async (data) => {
-                try {
-                    // Only update permissions if the updated account is the current user's account
-                    if (data.accountId && data.accountId === user.accountId) {
-                        // Fetch updated permissions
-                        await fetchAccountPermissions();
-                    }
-                } catch (error) {
-                    console.error('Error updating permissions:', error);
-                }
-            });
+        // Set up listener for UserOnline events
+        const unsubscribeUserOnline = signalRService.on('UserOnline', (userId) => {
+            // Clear any pending offline timeout for this user
+            if (userOfflineTimeouts.current[userId]) {
+                clearTimeout(userOfflineTimeouts.current[userId]);
+                delete userOfflineTimeouts.current[userId];
+            }
+            setOnlineUsers(prev => new Set([...prev, userId]));
+        });
 
-            // Clean up listeners when component unmounts or user changes
-            return () => {
-                unsubscribeDeactivated();
-                unsubscribePermissionUpdated();
-            };
-        }
+        // Set up listener for UserOffline events
+        const unsubscribeUserOffline = signalRService.on('UserOffline', (userId) => {
+            // Add a timeout to delay processing the offline status
+            const timeoutId = setTimeout(() => {
+                setOnlineUsers(prev => {
+                    const newSet = new Set([...prev]);
+                    newSet.delete(userId);
+                    return newSet;
+                });
+            }, 5000); // 5-second grace period
+
+            userOfflineTimeouts.current[userId] = timeoutId;
+        });
+
+        return () => {
+            unsubscribeUserOnline();
+            unsubscribeUserOffline();
+
+            // Clear any pending timeouts
+            Object.values(userOfflineTimeouts.current).forEach(clearTimeout);
+            userOfflineTimeouts.current = {};
+        };
     }, [user]);
+
+    // Handle visibility change
+    useEffect(() => {
+        if (!user) return;
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' &&
+                signalRService.connection?.state === 'Disconnected') {
+                signalRService.reconnect();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [user]);
+
+    // Handle account and permission updates
+    useEffect(() => {
+        if (!user) return;
+
+        // Set up listener for AccountDeactivated events
+        const unsubscribeDeactivated = signalRService.on('AccountDeactivated', (accountId) => {
+            if (accountId === user.accountId) {
+                setShowDisabledNotification(true);
+            }
+        });
+
+        // Set up listener for PermissionUpdated events
+        const unsubscribePermissionUpdated = signalRService.on('PermissionUpdated', (data) => {
+            if (data.accountId === user.accountId) {
+                fetchAccountPermissions();
+            }
+        });
+
+        return () => {
+            unsubscribeDeactivated();
+            unsubscribePermissionUpdated();
+        };
+    }, [user]);
+
+    // Fetch online users when connection is established
+    useEffect(() => {
+        if (user && connectionStatus === 'Connected') {
+            signalRService.connection.invoke('GetOnlineUsers')
+                .then(onlineUserIds => setOnlineUsers(new Set(onlineUserIds)))
+                .catch(err => console.error('Error getting online users:', err));
+        }
+    }, [user, connectionStatus]);
 
     const login = async (username, password, rememberMe = false) => {
         const response = await authService.login(username, password, rememberMe);
@@ -87,7 +167,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await authService.logout();
+        const currentUser = await authService.logout();
+        if (currentUser?.accountId) {
+            setOnlineUsers(prev => {
+                const newSet = new Set([...prev]);
+                newSet.delete(currentUser.accountId);
+                return newSet;
+            });
+        }
         setUser(null);
     };
 
@@ -108,7 +195,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, fetchAccountPermissions }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, fetchAccountPermissions, onlineUsers, connectionStatus }}>
             {!loading && children}
 
             {/* Account Disabled Notification Modal */}
