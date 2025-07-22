@@ -25,6 +25,7 @@ const Chat = () => {
     const [loadingChatsError, setLoadingChatsError] = useState(false);
     const [imageErrors, setImageErrors] = useState({});
 
+    const [selectedChatId, setSelectedChatId] = useState(null);
 
     const [messages, setMessages] = useState({});
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -33,9 +34,10 @@ const Chat = () => {
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
     const { onlineUsers, user } = useAuth();
+    const selectedChatIdRef = useRef(null);
 
     // Function to fetch chat list
-    const fetchChatList = async (showLoading) => {
+    const fetchChatList = async (showLoading, restoreSelectedChat = true) => {
         if (showLoading)
             setIsLoadingChats(showLoading);
 
@@ -58,15 +60,71 @@ const Chat = () => {
                 }));
                 setChats(formattedChats);
 
-                // Restore selected chat after fetching chat list
-                const savedChatId = localStorage.getItem('selectedChatId');
-                if (savedChatId) {
-                    const savedChat = formattedChats.find(chat => chat.id.toString() === savedChatId);
-                    if (savedChat) {
-                        setSelectedChat(savedChat);
-                        setShowMobileChat(true);
-                        // Fetch messages for the restored chat
-                        fetchChatMessages(savedChat.id, 1, false);
+                // Only try to restore the selected chat if requested
+                if (restoreSelectedChat) {
+                    // Try to restore selected chat after fetching chat list
+                    const savedChatId = localStorage.getItem('selectedChatId');
+                    const savedAccountId = localStorage.getItem('selectedAccountId');
+
+                    // Only try to restore a selected chat if there was one previously
+                    // or if this is an explicit user action (not an automatic refresh)
+                    if (selectedChat || showLoading) {
+                        // In the fetchChatList function, modify the code where it restores the selected chat
+                        if (savedChatId) {
+                            // First try by chat ID
+                            const savedChat = formattedChats.find(chat => chat.id.toString() === savedChatId);
+                            if (savedChat) {
+                                setSelectedChat(savedChat);
+                                selectedChatIdRef.current = savedChat.id;
+                                setSelectedChatId(savedChat.id); // Add this line to update the visual selection
+                                setShowMobileChat(true);
+
+                                // Mark chat as read on the server if it has unread messages
+                                if (savedChat.unread > 0) {
+                                    chatService.markChatAsRead(savedChat.id)
+                                        .catch(error => console.error('Error marking chat as read:', error));
+
+                                    // Also update the chat in the list to show 0 unread count
+                                    const updatedChat = { ...savedChat, unread: 0 };
+                                    setChats(prevChats =>
+                                        prevChats.map(c => c.id === savedChat.id ? updatedChat : c)
+                                    );
+                                }
+
+                                // Fetch messages for the restored chat
+                                fetchChatMessages(savedChat.id, 1, false);
+                                return; // Exit if we found a match
+                            }
+                        }
+
+                        if (savedAccountId) {
+                            // If chat ID didn't work, try by account ID
+                            const savedChatByAccount = formattedChats.find(chat =>
+                                !chat.isGroup && chat.accountId && chat.accountId.toString() === savedAccountId);
+                            if (savedChatByAccount) {
+                                setSelectedChat(savedChatByAccount);
+                                selectedChatIdRef.current = savedChatByAccount.id;
+                                setSelectedChatId(savedChatByAccount.id); // Add this line to update the visual selection
+                                setShowMobileChat(true);
+
+                                // Mark chat as read on the server if it has unread messages
+                                if (savedChatByAccount.unread > 0) {
+                                    chatService.markChatAsRead(savedChatByAccount.id)
+                                        .catch(error => console.error('Error marking chat as read:', error));
+
+                                    // Also update the chat in the list to show 0 unread count
+                                    const updatedChat = { ...savedChatByAccount, unread: 0 };
+                                    setChats(prevChats =>
+                                        prevChats.map(c => c.id === savedChatByAccount.id ? updatedChat : c)
+                                    );
+                                }
+
+                                // Fetch messages for the restored chat
+                                fetchChatMessages(savedChatByAccount.id, 1, false);
+                                // Update the saved chat ID to match the server's ID
+                                localStorage.setItem('selectedChatId', savedChatByAccount.id.toString());
+                            }
+                        }
                     }
                 }
             }
@@ -90,43 +148,87 @@ const Chat = () => {
             // Refresh chat list when sent message
             try {
                 const normalizedData = {
-                    roomId: newMessage.RoomId,
-                    message: newMessage.Message,
-                    sentBy: newMessage.SentBy,
-                    sentTo: newMessage.SentTo,
-                    sentAt: newMessage.SentAt
+                    roomId: newMessage.roomId,
+                    message: newMessage.message,
+                    sentBy: newMessage.sentBy,
+                    sentTo: newMessage.sentTo,
+                    sentAt: newMessage.sentAt
                 };
 
-                setMessages(prevMessages => {
-                    const roomMessages = prevMessages[normalizedData.roomId] || [];
-                    return {
-                        ...prevMessages,
-                        [normalizedData.roomId]: [...roomMessages, {
-                            id: Date.now(), // Temporary ID
-                            text: normalizedData.message,
-                            sent: normalizedData.sentBy === user.accountId,
-                            time: new Date(normalizedData.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        }]
-                    };
-                });
+                // Skip adding the message if it was sent by the current user
+                // Only update the chat list entry
+                const isSentByCurrentUser = normalizedData.sentBy === user.accountId;
 
+                if (!isSentByCurrentUser) {
+                    setMessages(prevMessages => {
+                        const roomMessages = prevMessages[normalizedData.roomId] || [];
+                        return {
+                            ...prevMessages,
+                            [normalizedData.roomId]: [...roomMessages, {
+                                id: Date.now(), // Temporary ID
+                                text: normalizedData.message,
+                                sent: normalizedData.sentBy === user.accountId,
+                                time: new Date(normalizedData.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            }]
+                        };
+                    });
+                }
+
+                // In the NewMessage event handler
                 setChats(prevChats => {
                     // First check if this chat exists in the list
                     const chatExists = prevChats.some(chat => chat.id === normalizedData.roomId);
 
                     if (!chatExists) {
-                        fetchChatList(false);
+                        // Don't change the selected chat when refreshing the chat list
+                        // Store the current selectedChatIdRef value
+                        const currentSelectedChatId = selectedChatIdRef.current;
+
+                        // Refresh the chat list without changing the selected chat
+                        fetchChatList(false, false).then(() => {
+                            // Restore the selectedChatIdRef after the chat list is refreshed
+                            selectedChatIdRef.current = currentSelectedChatId;
+                        });
                         return prevChats;
+                    }
+
+                    // Check if this is the selected chat
+                    const isSelectedChat = selectedChatIdRef.current === normalizedData.roomId;
+
+                    // Only mark as read if this is the selected chat AND the user is actively viewing it
+                    // (not just a temporary chat that was created but not yet used)
+                    if (isSelectedChat && normalizedData.sentBy !== user.accountId) {
+                        // Only mark as read if this chat has a real server ID (not a temporary one)
+                        const selectedChat = prevChats.find(chat => chat.id === normalizedData.roomId);
+                        const isTemporaryChat = !selectedChat.lastMessage && selectedChat.id > 1000000000000;
+
+                        if (!isTemporaryChat) {
+                            chatService.markChatAsRead(normalizedData.roomId)
+                                .catch(error => console.error('Error marking chat as read:', error));
+                        }
                     }
 
                     return prevChats.map(chat => {
                         if (chat.id === normalizedData.roomId) {
+                            // Check if this is the selected chat AND not a temporary chat
+                            const isRealSelectedChat = isSelectedChat && chat.lastMessage;
+
+                            // Don't increment unread count for messages sent by the current user
+                            if (normalizedData.sentBy === user.accountId) {
+                                return {
+                                    ...chat,
+                                    lastMessage: normalizedData.message,
+                                    time: new Date(normalizedData.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                    unread: chat.unread || 0
+                                };
+                            }
+
                             return {
                                 ...chat,
                                 lastMessage: normalizedData.message,
                                 time: new Date(normalizedData.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                                // Increment unread count if this chat isn't currently selected
-                                unread: selectedChat?.id === chat.id ? 0 : (chat.unread || 0) + 1
+                                // Only set unread to 0 if it's the selected chat, otherwise increment
+                                unread: isRealSelectedChat ? 0 : (chat.unread || 0) + 1
                             };
                         }
                         return chat;
@@ -142,7 +244,7 @@ const Chat = () => {
         return () => {
             unsubscribeSentMessage();
         };
-    }, [selectedChat]); // Re-subscribe when currentPage changes
+    }, [selectedChat, user.accountId]); // Add user.accountId to dependencies
 
     useEffect(() => {
         fetchChatList(true)
@@ -215,6 +317,12 @@ const Chat = () => {
 
         if (existingChat) {
             setSelectedChat(existingChat);
+            // Update the selectedChatIdRef to match the selected chat
+            selectedChatIdRef.current = existingChat.id;
+            // Add this line to update the selectedChatId
+            setSelectedChatId(existingChat.id);
+            // Save account ID instead of chat ID to localStorage
+            localStorage.setItem('selectedAccountId', account.accountId.toString());
         } else {
             // Create a new chat with this account
             const newChat = {
@@ -232,7 +340,14 @@ const Chat = () => {
             // Add to chats array (in a real app, you'd save this to your backend)
             setChats(prevChats => [...prevChats, newChat]);
             setSelectedChat(newChat);
+            // Update the selectedChatIdRef to match the new chat
+            selectedChatIdRef.current = newChat.id;
+            // Add this line to update the selectedChatId
+            setSelectedChatId(newChat.id);
+
+            console.log(newChat.id)
         }
+
 
         setShowMobileChat(true);
         setShowAccountList(false);
@@ -258,7 +373,7 @@ const Chat = () => {
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };
 
-                // Update the selected chat with the new message
+                // Create the updated chat object
                 const updatedChat = {
                     ...selectedChat,
                     messages: [...selectedChat.messages, newMessage],
@@ -267,14 +382,55 @@ const Chat = () => {
                 };
 
                 // Update the chats array
-                setChats(prevChats =>
-                    prevChats.map(chat =>
+                setChats(prevChats => {
+                    // First find and update the chat with the new message
+                    const updatedChats = prevChats.map(chat =>
                         chat.id === selectedChat.id ? updatedChat : chat
-                    )
-                );
+                    );
 
-                setSelectedChat(updatedChat);
+                    // Then sort the chats to bring the most recently messaged chat to the top
+                    const sortedChats = updatedChats.sort((a, b) => {
+                        // If either chat doesn't have a time, keep its current position
+                        if (!a.time || !b.time) return 0;
+
+                        // If the chat we just updated is in the comparison, it should be first
+                        if (a.id === selectedChat.id) return -1;
+                        if (b.id === selectedChat.id) return 1;
+
+                        // Otherwise compare by the stored time
+                        return 0; // Keep existing order for other chats
+                    });
+
+                    return sortedChats;
+                });
+
+                // Make sure to update selectedChatIdRef to maintain the selection
+                selectedChatIdRef.current = updatedChat.id;
+
+                // Add these lines to update localStorage
+                localStorage.setItem('selectedChatId', updatedChat.id.toString());
+                if (!updatedChat.isGroup && updatedChat.accountId) {
+                    localStorage.setItem('selectedAccountId', updatedChat.accountId.toString());
+                }
+
+                // Find the updated chat in the sorted chats array after the state update
+                // Use a small timeout to ensure the chats state has been updated
+                setTimeout(() => {
+                    const currentChat = chats.find(chat => chat.id === updatedChat.id);
+                    if (currentChat) {
+                        setSelectedChat(currentChat);
+                        // Add this line to update the selectedChatId
+                        setSelectedChatId(currentChat.id);
+                    }
+                }, 50);
+                setMessages(prevMessages => ({
+                    ...prevMessages,
+                    [selectedChat.id]: [...(prevMessages[selectedChat.id] || []), newMessage]
+                }));
+
+                // No need for the setTimeout anymore
                 setMessage('');
+                setShouldScrollToBottom(true); // Ensure we scroll to the bottom
             } else {
                 console.error('Failed to send message:', response.message);
                 // You could show an error notification here
@@ -290,18 +446,44 @@ const Chat = () => {
         // Update the selected chat with unread count reset to 0
         const updatedChat = { ...chat, unread: 0 };
         setSelectedChat(updatedChat);
+        // Make sure to update selectedChatId
+        setSelectedChatId(updatedChat.id);
         setShowMobileChat(true);
 
         // Save selected chat ID to localStorage
         localStorage.setItem('selectedChatId', chat.id.toString());
+
+        // Also save the account ID if this is a direct chat
+        if (!chat.isGroup && chat.accountId) {
+            localStorage.setItem('selectedAccountId', chat.accountId.toString());
+        }
 
         // Update the chat in the chats list
         setChats(prevChats =>
             prevChats.map(c => c.id === chat.id ? updatedChat : c)
         );
 
-        // Fetch messages for the selected chat
-        fetchChatMessages(chat.id, 1, true);
+        // Mark chat as read on the server
+        if (chat.unread > 0) {
+            chatService.markChatAsRead(chat.id)
+                .catch(error => console.error('Error marking chat as read:', error));
+        }
+
+        // Only fetch messages if this is not a newly created chat without a server ID
+        // Check if the ID is a temporary one (created with Date.now())
+        const isTemporaryChat = !chat.lastMessage && chat.id > 1000000000000; // Date.now() values are large numbers
+
+        if (!isTemporaryChat) {
+            // Fetch messages for the selected chat
+            fetchChatMessages(chat.id, 1, true);
+        } else {
+            // For new chats without messages, just set an empty messages array
+            setMessages(prevMessages => ({
+                ...prevMessages,
+                [chat.id]: []
+            }));
+            setLoadingMessagesError(null);
+        }
     };
 
     const handleBackToList = () => {
@@ -428,7 +610,7 @@ const Chat = () => {
                             filteredChats.map(chat => (
                                 <div
                                     key={chat.id}
-                                    className={`p-4 cursor-pointer transition-colors ${selectedChat?.id === chat.id
+                                    className={`p-4 cursor-pointer transition-colors ${selectedChatId === chat.id
                                         ? (darkMode ? 'bg-gray-700' : 'bg-gray-200')
                                         : ''} ${darkMode
                                             ? 'hover:bg-gray-700'

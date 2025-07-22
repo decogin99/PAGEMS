@@ -25,6 +25,13 @@ const chatService = {
             chatRoomId,
             page
         });
+    },
+    
+    // Mark all messages in a chat as read
+    markChatAsRead: async (chatRoomId) => {
+        return apiService.post('/Chat/markChatAsRead', {
+            chatRoomId
+        });
     }
 };
 
