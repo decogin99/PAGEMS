@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import NoPermissionPage from "./pages/NoPermissionPage";
 import { AuthProvider } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
 import { useAuth } from './context/AuthContext';
 
 // Import Report Views
@@ -71,158 +72,160 @@ const PermissionRoute = ({ children, requiredPermission, requiredValue }) => {
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PermissionRoute requiredPermission="dashboardView">
-                <Dashboard />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/announcements"
-            element={
-              <PermissionRoute requiredPermission="announcementView">
-                <Announcements />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/activities"
-            element={
-              <PermissionRoute requiredPermission="activityView">
-                <Activities />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/leave"
-            element={
-              <PermissionRoute requiredPermission="leaveView">
-                <Leave />
-              </PermissionRoute>
-            }
-          />
-          {/* Report Routes */}
-          <Route
-            path="/report/bod"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="BOD">
-                <Report_BOD />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/it"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="IT">
-                <Report_IT />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/software"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Software">
-                <Report_Software />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/design"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Design">
-                <Report_Design />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/factory"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Factory">
-                <Report_Factory />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/finance"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Finance">
-                <Report_Finance />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/hradmin"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="HRAdmin">
-                <Report_HRAdmin />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/report/marketing"
-            element={
-              <PermissionRoute requiredPermission="dailyReportView" requiredValue="Marketing">
-                <Report_Marketing />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/employees"
-            element={
-              <PermissionRoute requiredPermission="employeeView">
-                <Employees />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/accounts"
-            element={
-              <PermissionRoute requiredPermission="employeeView">
-                <Accounts />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/carbooking"
-            element={
-              <PermissionRoute requiredPermission="carBookingView">
-                <CarBooking />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <PrivateRoute>
-                <Chat />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile/:id"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route path="*" element={<div className="p-6 text-center text-red-600">404 - Page Not Found</div>} />
-        </Routes>
-      </Router>
+      <ChatProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PermissionRoute requiredPermission="dashboardView">
+                  <Dashboard />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/announcements"
+              element={
+                <PermissionRoute requiredPermission="announcementView">
+                  <Announcements />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/activities"
+              element={
+                <PermissionRoute requiredPermission="activityView">
+                  <Activities />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/leave"
+              element={
+                <PermissionRoute requiredPermission="leaveView">
+                  <Leave />
+                </PermissionRoute>
+              }
+            />
+            {/* Report Routes */}
+            <Route
+              path="/report/bod"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="BOD">
+                  <Report_BOD />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/it"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="IT">
+                  <Report_IT />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/software"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="Software">
+                  <Report_Software />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/design"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="Design">
+                  <Report_Design />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/factory"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="Factory">
+                  <Report_Factory />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/finance"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="Finance">
+                  <Report_Finance />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/hradmin"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="HRAdmin">
+                  <Report_HRAdmin />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/report/marketing"
+              element={
+                <PermissionRoute requiredPermission="dailyReportView" requiredValue="Marketing">
+                  <Report_Marketing />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/employees"
+              element={
+                <PermissionRoute requiredPermission="employeeView">
+                  <Employees />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/accounts"
+              element={
+                <PermissionRoute requiredPermission="employeeView">
+                  <Accounts />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/carbooking"
+              element={
+                <PermissionRoute requiredPermission="carBookingView">
+                  <CarBooking />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <PrivateRoute>
+                  <Chat />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile/:id"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route path="*" element={<div className="p-6 text-center text-red-600">404 - Page Not Found</div>} />
+          </Routes>
+        </Router>
+      </ChatProvider>
     </AuthProvider>
   );
 };

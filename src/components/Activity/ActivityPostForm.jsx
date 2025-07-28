@@ -3,16 +3,17 @@ import { useTheme } from '../../context/ThemeContext';
 import activityService from '../../services/activityService';
 
 const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
-    const [newPost, setNewPost] = useState({
-        activityName: '',
-        images: []
-    });
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
     const [photoError, setPhotoError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(''); // New state for error messages
     const { darkMode } = useTheme();
+
+    const [newPost, setNewPost] = useState({
+        activityName: '',
+        images: []
+    });
 
     // Reset form when modal is closed
     useEffect(() => {
@@ -110,7 +111,7 @@ const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
     // The rest of the component remains the same
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div className="flex items-center justify-center min-h-screen p-4 text-center">
+            <div className="flex items-center justify-center min-h-screen px-4 text-center">
                 {/* Background overlay */}
                 <div
                     className="fixed inset-0 backdrop-blur-sm bg-opacity-75 transition-opacity"
@@ -121,8 +122,10 @@ const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
                 {/* Modal panel */}
                 <div className="relative inline-block align-middle bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full">
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} px-4 pt-5 pb-4 sm:p-6 sm:pb-4`}>
+
+                        {/* Header */}
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Create New Activity Post</h2>
+                            <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Create New Activity</h2>
                             <button
                                 type="button"
                                 onClick={handleClose}
@@ -144,7 +147,7 @@ const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label htmlFor="activityName" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                    Activity Name
+                                    Activity Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -159,7 +162,7 @@ const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
 
                             <div className="mb-4">
                                 <label htmlFor='images' className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                    Images
+                                    Images <span className="text-red-500">*</span>
                                 </label>
                                 <div className={`border-2 border-dashed rounded-lg p-4 text-center ${photoError ? 'border-red-500' : darkMode ? 'border-gray-600 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'}`}>
                                     <input
@@ -226,14 +229,14 @@ const ActivityPostForm = ({ isOpen, onClose, onSubmit }) => {
                                 <button
                                     type="button"
                                     onClick={handleClose}
-                                    className={`mr-2 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    className={`text-sm mr-2 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                                     disabled={isLoading}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors flex items-center justify-center min-w-[100px]"
+                                    className="text-sm px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors flex items-center justify-center min-w-[100px]"
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (

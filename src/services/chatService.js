@@ -18,7 +18,7 @@ const chatService = {
             content
         });
     },
-    
+
     // Get chat message list by chatRoomId with pagination
     getChatMessageList: async (chatRoomId, page = 1) => {
         return apiService.post('/Chat/getChatMessageList', {
@@ -26,7 +26,7 @@ const chatService = {
             page
         });
     },
-    
+
     // Mark all messages in a chat as read
     markChatAsRead: async (chatRoomId) => {
         return apiService.post('/Chat/markChatAsRead', {

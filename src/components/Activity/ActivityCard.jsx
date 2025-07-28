@@ -105,7 +105,10 @@ const ActivityCard = ({
                                                         </button>
                                                         <div
                                                             id={`dropdown-${activity.activityId}`}
-                                                            className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 hidden z-10 ${darkMode ? 'bg-gray-700' : 'bg-white'} ring-1 ring-black ring-opacity-5`}
+                                                            className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 hidden z-50 ${darkMode ? 'bg-gray-700 ring-gray-500' : 'bg-white ring-gray-300'} ring-1`}
+                                                            onMouseLeave={() => {
+                                                                document.getElementById(`dropdown-${activity.activityId}`).classList.add('hidden');
+                                                            }}
                                                         >
                                                             <button
                                                                 onClick={() => {
@@ -114,7 +117,12 @@ const ActivityCard = ({
                                                                 }}
                                                                 className={`block px-4 py-2 text-sm w-full text-left ${darkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
                                                             >
-                                                                Edit
+                                                                <div className="flex items-center gap-2">
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                    </svg>
+                                                                    Edit
+                                                                </div>
                                                             </button>
                                                             <button
                                                                 onClick={() => {
@@ -123,7 +131,12 @@ const ActivityCard = ({
                                                                 }}
                                                                 className={`block px-4 py-2 text-sm w-full text-left ${darkMode ? 'text-red-400 hover:bg-gray-600' : 'text-red-600 hover:bg-gray-100'}`}
                                                             >
-                                                                Delete
+                                                                <div className="flex items-center gap-2">
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </div>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -269,8 +282,13 @@ const ActivityCard = ({
                             )}
                         </div>
                     ) : (
-                        <div className={`text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                            <p>No activities found!</p>
+                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm py-6 text-center`}>
+                            <svg className={`w-12 h-12 mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-400'} mb-4`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <div className={`text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                <p>No activities found!</p>
+                            </div>
                         </div>
                     )}
                 </>

@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 
 const Navbar = ({ onMenuClick }) => {
     const navigate = useNavigate();
     const { darkMode } = useTheme();
     const { user } = useAuth();
+    const { totalUnreadCount } = useChat();
     const [imageError, setImageError] = useState(false);
 
     const permissions = user?.permissions || {};
@@ -51,8 +53,10 @@ const Navbar = ({ onMenuClick }) => {
                                         </svg>
                                     </button>
 
-                                    {/* Red Dot Notification */}
-                                    <span className={`absolute top-1.5 right-1.5 block h-2 md:h-2.5 w-2 md:w-2.5 rounded-full bg-red-600 ring-2 ${darkMode ? 'ring-gray-800' : 'ring-white'}`}></span>
+                                    {/* Conditional Red Dot Notification */}
+                                    {totalUnreadCount > 0 && (
+                                        <span className={`absolute top-1.5 right-1.5 block h-2 md:h-2.5 w-2 md:w-2.5 rounded-full bg-red-600 ring-2 ${darkMode ? 'ring-gray-800' : 'ring-white'}`}></span>
+                                    )}
                                 </div>
                             )}
 

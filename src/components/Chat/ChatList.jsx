@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 
-function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListError, showMobileChat, handleNewChat, selectedChatId}){
+function ChatList({ fetchChatList, chatList, isLoadingChatList, loadingChatListError, showMobileChat, handleNewChat, handleChatSelect, selectedChatId }) {
+
+
     const { darkMode } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
     const [imageErrors, setImageErrors] = useState({});
@@ -12,14 +14,10 @@ function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListEr
         chat.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleChatSelect = (chat) => {
-        console.log(chat)
-    }
-    
     useEffect(() => {
         fetchChatList(true);
     }, []);
-    
+
     return (
         <div className={`w-full md:w-80 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r flex flex-col ${showMobileChat ? 'hidden md:flex' : 'flex'}`}>
 
@@ -31,9 +29,9 @@ function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListEr
                         onClick={handleNewChat}
                         className="p-2 bg-[#0054A6] text-white rounded-full hover:bg-[#004080] transition-colors"
                         title="New Message">
-                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
+                        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
                     </button>
                 </div>
                 <div className="relative">
@@ -56,9 +54,9 @@ function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListEr
             {/* Chat List */}
             <div className={`flex-1 overflow-y-auto ${darkMode ? 'custom-scrollbar-dark' : 'custom-scrollbar-light'}`}>
                 {isLoadingChatList ? (
-                     <div className="flex justify-center items-center p-4">
-                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0054A6]"></div>
-                 </div>
+                    <div className="flex justify-center items-center p-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0054A6]"></div>
+                    </div>
                 ) : loadingChatListError ? (
                     <div className="flex flex-col items-center justify-center p-4 text-center">
                         <div className="mb-2 text-red-500">
@@ -77,13 +75,13 @@ function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListEr
                     </div>
                 ) : filteredChats.length > 0 ? (
                     filteredChats.map(chat => (
-                        <div 
+                        <div
                             key={chat.id}
                             className={`p-4 cursor-pointer transition-colors flex items-start space-x-3 ${selectedChatId === chat.id
-                            ? (darkMode ? 'bg-gray-700' : 'bg-gray-200')
-                            : ''} ${darkMode
-                                ? 'hover:bg-gray-700'
-                                : 'hover:bg-gray-200'}`}
+                                ? (darkMode ? 'bg-gray-700' : 'bg-gray-200')
+                                : ''} ${darkMode
+                                    ? 'hover:bg-gray-700'
+                                    : 'hover:bg-gray-200'}`}
                             onClick={() => handleChatSelect(chat)}>
                             <div className="relative">
                                 {chat.photo && !imageErrors[chat.id] ? (
@@ -103,7 +101,7 @@ function ChatList({fetchChatList, chatList, isLoadingChatList, loadingChatListEr
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center justify-between mb-1 space-x-5">
                                     <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} truncate`}>{chat.name}</h3>
                                     <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-2`}>{chat.time}</span>
                                 </div>

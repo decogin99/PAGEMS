@@ -28,6 +28,10 @@ select {
   font-size: 12px !important;
 }
 
+.announcement-content * {
+  color: inherit !important;
+}
+
 button {
   cursor: pointer;
 }

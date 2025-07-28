@@ -3,15 +3,13 @@ import * as signalR from '@microsoft/signalr';
 const API_URL = import.meta.env.VITE_API_URL;
 
 class SignalRService {
-    // Add this to the constructor
     constructor() {
         this.connection = null;
         this.callbacks = {};
-        // Initialize connection immediately
+        this.registeredEvents = new Set(); // Track which events have SignalR handlers
         this.initializeConnection();
     }
 
-    // Add this to the initializeConnection method after creating the connection
     initializeConnection = () => {
         if (this.connection) return;
 
@@ -20,7 +18,6 @@ class SignalRService {
             .withAutomaticReconnect()
             .build();
 
-        // Log connection state changes
         this.connection.onclose(() => {
             setTimeout(() => this.reconnect(), 5000);
         });
@@ -29,31 +26,39 @@ class SignalRService {
             this.reregisterCallbacks();
         });
 
-        // Start the connection
         this.startConnection();
     }
 
-    // Add a method to reconnect
     reconnect = () => {
         if (this.connection && this.connection.state === signalR.HubConnectionState.Disconnected) {
             this.startConnection();
         }
     }
 
-    // Add a method to re-register all callbacks after reconnection
     reregisterCallbacks = () => {
-        const callbacksCopy = { ...this.callbacks };
-        this.callbacks = {};
+        // Clear registered events tracking
+        this.registeredEvents.clear();
 
-        // Re-register each callback
-        Object.entries(callbacksCopy).forEach(([event, callbacks]) => {
-            callbacks.forEach(callback => {
-                this.on(event, callback);
-            });
+        // Re-register SignalR handlers for events that have callbacks
+        Object.keys(this.callbacks).forEach(event => {
+            if (this.callbacks[event].length > 0) {
+                this.registerSignalRHandler(event);
+            }
         });
     }
 
-    // Modify the on method to check connection state
+    registerSignalRHandler = (event) => {
+        if (this.registeredEvents.has(event)) return;
+
+        this.connection.on(event, (...args) => {
+            if (this.callbacks[event]) {
+                this.callbacks[event].forEach(cb => cb(...args));
+            }
+        });
+
+        this.registeredEvents.add(event);
+    }
+
     on = (event, callback) => {
         if (!this.connection) {
             this.initializeConnection();
@@ -67,28 +72,21 @@ class SignalRService {
         }
         this.callbacks[event].push(callback);
 
-        // Register the callback with SignalR
-        this.connection.on(event, (...args) => {
-            if (this.callbacks[event]) {
-                this.callbacks[event].forEach(cb => cb(...args));
-            }
-        });
+        // Register the SignalR handler only once per event type
+        this.registerSignalRHandler(event);
 
         return () => this.off(event, callback);
     }
 
-    // Start the SignalR connection
     startConnection = async () => {
         try {
             await this.connection.start();
         } catch (error) {
             console.error('Error establishing SignalR connection:', error);
-            // Retry connection after 5 seconds
             setTimeout(this.startConnection, 5000);
         }
     }
 
-    // Remove a callback for a specific event
     off = (event, callback) => {
         if (!this.connection || !this.callbacks[event]) return;
 
@@ -98,17 +96,18 @@ class SignalRService {
         // If no more callbacks for this event, remove the SignalR handler
         if (this.callbacks[event].length === 0) {
             this.connection.off(event);
+            this.registeredEvents.delete(event);
             delete this.callbacks[event];
         }
     }
 
-    // Stop the SignalR connection
     stopConnection = async () => {
         if (this.connection) {
             try {
                 await this.connection.stop();
                 this.connection = null;
                 this.callbacks = {};
+                this.registeredEvents.clear();
             } catch (error) {
                 console.error('Error stopping SignalR connection:', error);
             }

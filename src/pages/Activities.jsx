@@ -11,7 +11,7 @@ import signalRService from '../services/signalRService';
 
 const Activities = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [showNewPostForm, setShowNewPostForm] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -205,14 +205,8 @@ const Activities = () => {
         }));
     };
 
-    const handleSubmitPost = (postData) => {
-        // The postData will contain the response from the API
-        console.log('New post created:', postData);
-
-        // Close the form
-        setShowNewPostForm(false);
-
-        // Refresh the activities list to show the new post
+    const handleActivityCreated = () => {
+        setShowCreateForm(false);
         fetchActivities(1);
     };
 
@@ -266,9 +260,9 @@ const Activities = () => {
 
             {/* Activity Post Form Modal */}
             <ActivityPostForm
-                isOpen={showNewPostForm}
-                onClose={() => setShowNewPostForm(false)}
-                onSubmit={handleSubmitPost}
+                isOpen={showCreateForm}
+                onClose={() => setShowCreateForm(false)}
+                onSubmit={handleActivityCreated}
             />
 
             {/* Activity Edit Form Modal */}
@@ -332,11 +326,10 @@ const Activities = () => {
                             <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Activities
                             </h1>
-                            {/* Only show New Post button if user has Full Control permission */}
                             {hasFullControl && (
                                 <button
-                                    onClick={() => setShowNewPostForm(true)}
-                                    className="px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors flex items-center gap-2"
+                                    onClick={() => setShowCreateForm(true)}
+                                    className="text-sm px-4 py-2 bg-[#0054A6] text-white rounded-lg hover:bg-[#004080] transition-colors flex items-center gap-2"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
